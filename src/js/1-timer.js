@@ -9,16 +9,19 @@ const daysElem = document.querySelector('span[data-days]');
 const hoursElem = document.querySelector('span[data-hours]');
 const minutesElem = document.querySelector('span[data-minutes]');
 const secondsElem = document.querySelector('span[data-seconds]');
+const inputTime = document.querySelector('#datetime-picker');
 
 const options = {
   enableTime: true,
   time_24hr: true,
   defaultDate: new Date(),
   minuteIncrement: 1,
+
   onClose(selectedDates) {
     const selectedDate = selectedDates[0];
     const currentDate = new Date();
-
+    
+    
     if (selectedDate < currentDate) {
       iziToast.error({
         title: 'Error',
@@ -41,20 +44,23 @@ const datePicker = flatpickr('#datetime-picker', options);
 let intervalId;
 
 btnElem.addEventListener('click', startTimer);
+btnElem.disabled = true;
+
 
 function startTimer() {
   const selectedDate = datePicker.selectedDates[0];
   const currentDate = new Date();
+  inputTime.disabled = true;
 
   if (selectedDate <= currentDate) {
     iziToast.error({
       title: 'Error',
       message: 'Please choose a date in the future',
       position: `topRight`,
-        messageColor: '#ffffff',
-        titleColor: '#ffffff',
-        iconColor: '#ffffff',
-        backgroundColor: '#B51B1B'
+      messageColor: '#ffffff',
+      titleColor: '#ffffff',
+      iconColor: '#ffffff',
+      backgroundColor: '#B51B1B'
     });
     return;
   }
@@ -63,6 +69,7 @@ function startTimer() {
   intervalId = setInterval(updateTimer, 1000, selectedDate);
 }
 
+
 function updateTimer(selectedDate, intervalId) {
   const currentDate = new Date();
   const difference = selectedDate - currentDate;
@@ -70,12 +77,15 @@ function updateTimer(selectedDate, intervalId) {
   if (difference <= 0) {
     clearInterval(intervalId);
     displayTimer(0, 0, 0, 0);
+    inputTime.disabled = false;
+    btnElem.disabled = false;
     return;
   }
 
   const { days, hours, minutes, seconds } = convertMs(difference);
   displayTimer(days, hours, minutes, seconds);
 }
+
 
 function displayTimer(days, hours, minutes, seconds) {
   daysElem.textContent = addLeadingZero(days);
@@ -84,9 +94,11 @@ function displayTimer(days, hours, minutes, seconds) {
   secondsElem.textContent = addLeadingZero(seconds);
 }
 
+
 function addLeadingZero(value) {
   return value.toString().padStart(2, '0');
 }
+
 
 function convertMs(ms) {
   const second = 1000;
